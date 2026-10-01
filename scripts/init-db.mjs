@@ -109,6 +109,13 @@ CREATE TABLE IF NOT EXISTS reminder_logs (
   PRIMARY KEY (reminder_id, log_date)
 );
 
+-- One row per digest push sent (morning/evening) per local day.
+CREATE TABLE IF NOT EXISTS digest_log (
+  kind TEXT NOT NULL,
+  log_date TEXT NOT NULL,
+  PRIMARY KEY (kind, log_date)
+);
+
 CREATE TABLE IF NOT EXISTS push_subscriptions (
   endpoint TEXT PRIMARY KEY,
   p256dh TEXT NOT NULL,

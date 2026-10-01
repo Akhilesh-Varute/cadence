@@ -7,7 +7,7 @@ import Skeleton from "../components/Skeleton";
 import ErrorBanner from "../components/ErrorBanner";
 import { fetchJson } from "../lib/fetchJson";
 import { getCache, setCache } from "../lib/pageCache";
-import { toDateStr, isDueOn, fmtTime } from "../lib/reminders";
+import { toDateStr, isDueOn, fmtTime, shiftDate } from "../lib/reminders";
 
 const CARD = "bg-card dark:bg-dcard border border-line-soft dark:border-dline-soft rounded-lg2 shadow-card p-4 space-y-3";
 const H2 = "text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-ink-faint dark:text-dink-faint";
@@ -38,6 +38,7 @@ export default function TodayPage() {
   const [reminders, setReminders] = useState(cached?.reminders || []);
   const [doneIds, setDoneIds] = useState(cached?.doneIds || []);
   const [todos, setTodos] = useState(cached?.todos || []);
+  const [deferred, setDeferred] = useState(cached?.deferred || []);
   const [loading, setLoading] = useState(!cached);
   const [error, setError] = useState(null);
   const [newTodo, setNewTodo] = useState("");
@@ -53,7 +54,8 @@ export default function TodayPage() {
       setReminders(r.reminders);
       setDoneIds(r.doneIds);
       setTodos(t.todos || []);
-      setCache("today-home", { reminders: r.reminders, doneIds: r.doneIds, todos: t.todos || [] });
+      setDeferred(t.deferred || []);
+      setCache("today-home", { reminders: r.reminders, doneIds: r.doneIds, todos: t.todos || [], deferred: t.deferred || [] });
     } catch (err) {
       setError(err.message || "Couldn't load.");
     } finally {
@@ -87,6 +89,11 @@ export default function TodayPage() {
   function toggleTodo(t) {
     setTodos(todos.map((x) => (x.id === t.id ? { ...x, done: t.done ? 0 : 1 } : x)));
     act(() => send("/api/todos", "PATCH", { id: t.id, done: !t.done, completed_date: today }));
+  }
+
+  // defer_until hides a todo until that day; null brings it back today.
+  function deferTodo(t, until) {
+    act(() => send("/api/todos", "PATCH", { id: t.id, defer_until: until }));
   }
 
   async function addTodo(e) {
@@ -178,6 +185,18 @@ export default function TodayPage() {
               <span className={`flex-1 min-w-0 text-base ${t.done ? "line-through text-ink-faint dark:text-dink-faint" : ""}`}>
                 {t.text}
               </span>
+              {!t.done && (
+                <button
+                  onClick={() => deferTodo(t, shiftDate(today, 1))}
+                  aria-label="Move to tomorrow"
+                  title="Move to tomorrow"
+                  className="flex-none w-8 h-8 rounded-full bg-accent-soft dark:bg-daccent-soft text-accent dark:text-daccent flex items-center justify-center"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+                    <path d="M5 12h14M13 6l6 6-6 6" />
+                  </svg>
+                </button>
+              )}
               <button
                 onClick={() => act(() => fetchJson(`/api/todos?id=${t.id}`, { method: "DELETE" }))}
                 aria-label="Remove todo"
@@ -191,6 +210,27 @@ export default function TodayPage() {
           ))}
           {todos.length === 0 && <p className="text-ink-faint dark:text-dink-faint text-base py-1">Nothing on the list. Add what you want done today.</p>}
         </ul>
+        {deferred.length > 0 && (
+          <div className="pt-2 border-t border-line-soft dark:border-dline-soft space-y-2">
+            <h3 className="text-[0.65rem] font-semibold uppercase tracking-[0.08em] text-ink-faint dark:text-dink-faint">Later</h3>
+            <ul className="space-y-2">
+              {deferred.map((t) => (
+                <li key={t.id} className="flex items-center gap-2">
+                  <span className="flex-1 min-w-0 text-base text-ink-soft dark:text-dink-soft truncate">{t.text}</span>
+                  <span className="flex-none text-[0.65rem] font-mono text-ink-faint dark:text-dink-faint">
+                    {t.defer_until === shiftDate(today, 1) ? "tomorrow" : t.defer_until}
+                  </span>
+                  <button
+                    onClick={() => deferTodo(t, null)}
+                    className="flex-none text-xs font-semibold bg-accent-soft dark:bg-daccent-soft text-accent dark:text-daccent rounded-full px-3 py-1.5"
+                  >
+                    bring to today
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </section>
     </div>
   );
