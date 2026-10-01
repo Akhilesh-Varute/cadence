@@ -62,6 +62,8 @@ export const newId = uid;
 export function StoreProvider({ enabled, children }) {
   const [state, setState] = useState(null);
   const [error, setError] = useState(null);
+  const [syncError, setSyncError] = useState(false); // last sync attempt failed
+  const [pending, setPending] = useState(0); // edits waiting to be sent
   const [now, setNow] = useState(() => new Date());
   const [ui, setUi] = useState({ rf: "all", tf: "all" });
   const stateRef = useRef(null);
@@ -75,7 +77,11 @@ export function StoreProvider({ enabled, children }) {
     kvSet("state", next);
   }, []);
 
-  const saveOutbox = () => kvSet("outbox", outbox.current);
+  const setBox = (arr) => {
+    outbox.current = arr;
+    setPending(arr.length);
+    kvSet("outbox", arr);
+  };
 
   // Send queued ops, then pull the server's state and replay what is still pending.
   const sync = useCallback(async () => {
@@ -94,8 +100,7 @@ export function StoreProvider({ enabled, children }) {
           return;
         }
         if (!res.ok) throw new Error(`sync failed (${res.status})`);
-        outbox.current = outbox.current.slice(batch.length); // server rejects bad ops individually; don't retry them forever
-        await saveOutbox();
+        setBox(outbox.current.slice(batch.length)); // server rejects bad ops individually; don't retry them forever
       }
       const res = await fetch("/api/state", { cache: "no-store" });
       if (res.status === 401) {
@@ -106,9 +111,11 @@ export function StoreProvider({ enabled, children }) {
       const server = await res.json();
       commit(replay(server, outbox.current));
       setError(null);
+      setSyncError(false);
       lastPull.current = Date.now();
       if (outbox.current.length) setTimeout(sync, 0); // more than one batch queued
     } catch (e) {
+      setSyncError(true);
       if (!stateRef.current) setError("Couldn't reach the server. Check your connection and try again.");
     } finally {
       busy.current = false;
@@ -120,7 +127,7 @@ export function StoreProvider({ enabled, children }) {
     let alive = true;
     (async () => {
       const [local, box] = await Promise.all([kvGet("state"), kvGet("outbox")]);
-      outbox.current = Array.isArray(box) ? box : [];
+      setBox(Array.isArray(box) ? box : []);
       if (local && alive) commit(local);
       sync();
     })();
@@ -158,8 +165,7 @@ export function StoreProvider({ enabled, children }) {
     (op) => {
       if (!stateRef.current) return;
       commit(applyOp(stateRef.current, op));
-      outbox.current = [...outbox.current, op];
-      saveOutbox();
+      setBox([...outbox.current, op]);
       sync();
     },
     [commit, sync]
@@ -198,8 +204,7 @@ export function StoreProvider({ enabled, children }) {
 
       // Wipe this device's copy and reload from the server.
       async resetLocal() {
-        outbox.current = [];
-        await kvSet("outbox", []);
+        setBox([]);
         await kvSet("state", null);
         stateRef.current = null;
         setState(null);
@@ -209,8 +214,8 @@ export function StoreProvider({ enabled, children }) {
   }, [mutate, sync]);
 
   const value = useMemo(
-    () => ({ state, error, now, ui, setUi: (p) => setUi((u) => ({ ...u, ...p })), retry: sync, ...api }),
-    [state, error, now, ui, api, sync]
+    () => ({ state, error, syncError, pending, now, ui, setUi: (p) => setUi((u) => ({ ...u, ...p })), retry: sync, ...api }),
+    [state, error, syncError, pending, now, ui, api, sync]
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

@@ -37,8 +37,10 @@ function LoginForm() {
       if (res.status === 429) {
         const body = await res.json().catch(() => null);
         setError(body?.error || "Too many attempts. Try again later.");
-      } else {
+      } else if (res.status === 401) {
         setError("That PIN is wrong. Try again.");
+      } else {
+        setError("The server had a problem. Wait a moment and try again.");
       }
       setPin("");
     } catch {
