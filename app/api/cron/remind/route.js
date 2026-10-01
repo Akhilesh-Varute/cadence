@@ -10,11 +10,15 @@ export const dynamic = "force-dynamic";
 // it being due -- no 9am reminder arriving at 9pm.
 const GRACE_MIN = 120;
 
-// Daily digests, local time. Change here to move them.
-const DIGESTS = [
-  { kind: "morning", at: 8 * 60 },
-  { kind: "evening", at: 20 * 60 },
-];
+// Daily digests: local times come from Settings ("HH:MM", or "" for off).
+function digestSchedule(settings) {
+  return [
+    { kind: "morning", time: settings.digestMorning },
+    { kind: "evening", time: settings.digestEvening },
+  ]
+    .filter((d) => /^\d\d:\d\d$/.test(d.time || ""))
+    .map((d) => ({ kind: d.kind, at: Number(d.time.slice(0, 2)) * 60 + Number(d.time.slice(3)) }));
+}
 
 function alertBody(m, cursor) {
   const time = fmtTime(parse(cursor));
@@ -56,12 +60,12 @@ async function sendReminderAlerts(db, fallbackTz) {
 
 // One push per kind per local day: the digest_log insert is the lock, so
 // overlapping cron calls can't double-send.
-async function sendDigests(db, tz) {
+async function sendDigests(db, tz, schedule) {
   const wall = wallClock(tz);
   const today = dateOnly(wall);
   const minutes = wall.getHours() * 60 + wall.getMinutes();
   let sent = 0;
-  for (const d of DIGESTS) {
+  for (const d of schedule) {
     const late = minutes - d.at;
     if (late < 0 || late > GRACE_MIN) continue;
     const claim = await db.execute({
@@ -113,8 +117,9 @@ export async function GET(req) {
   await ensureSchema();
   const db = getDb();
   // Zone used when a reminder has none, and for the digests: what the phone last reported.
-  const tz = (await getSettings()).tz || "Asia/Kolkata";
+  const settings = await getSettings();
+  const tz = settings.tz || "Asia/Kolkata";
   const fired = await sendReminderAlerts(db, tz);
-  const digests = await sendDigests(db, tz);
+  const digests = await sendDigests(db, tz, digestSchedule(settings));
   return NextResponse.json({ ok: true, fired, digests });
 }

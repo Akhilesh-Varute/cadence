@@ -41,7 +41,7 @@ export const EMPTY = {
   lists: [],
   reminders: [],
   tasks: [],
-  settings: { theme: "system", accent: "#3346FF", density: "comfortable", weekStart: 1, defaultAlert: 0, tz: "" },
+  settings: { theme: "system", accent: "#3346FF", density: "comfortable", weekStart: 1, defaultAlert: 0, tz: "", digestMorning: "08:00", digestEvening: "20:00" },
 };
 
 const bucket = { reminder: "reminders", task: "tasks", list: "lists" };

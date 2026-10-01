@@ -57,6 +57,31 @@ function usePush() {
   return { status, enable };
 }
 
+// One daily summary push: Off, or On with a time of day.
+function DigestRow({ label, value, fallback, onChange }) {
+  return (
+    <>
+      <div className="line">
+        <span>{label}</span>
+        <Seg min={140} value={!!value} options={[[false, "Off"], [true, "On"]]} onPick={(on) => onChange(on ? fallback : "")} />
+      </div>
+      {value && (
+        <div className="line">
+          <span>Sent at</span>
+          <input
+            className="inp"
+            style={{ width: 150 }}
+            type="time"
+            aria-label={`${label} time`}
+            value={value}
+            onChange={(e) => e.target.value && onChange(e.target.value)}
+          />
+        </div>
+      )}
+    </>
+  );
+}
+
 const PUSH_NOTE = {
   checking: "Checking this device.",
   on: "On for this device. A test notification was sent.",
@@ -163,6 +188,11 @@ export default function SettingsPage() {
             <button className="btn" disabled={busy} onClick={turnOn}>{push.status === "on" ? "Send test" : "Turn on"}</button>
           )}
         </div>
+
+        <div className="sec">Daily summary</div>
+        <DigestRow label="Morning summary" value={s.digestMorning} fallback="08:00" onChange={(v) => setSettings({ digestMorning: v })} />
+        <DigestRow label="Evening summary" value={s.digestEvening} fallback="20:00" onChange={(v) => setSettings({ digestEvening: v })} />
+        <p className="note">One notification a day, only when something is due or still open. It uses this phone&apos;s time zone.</p>
 
         <div className="sec">Put it on your iPhone</div>
         <p className="note" style={{ marginTop: 0 }}>

@@ -62,7 +62,7 @@ Order of fields for a reminder:
 Task fields: title, notes, due date (clearable), steps (add, check, remove), priority, list.
 
 ## Settings
-Theme (System, Light, Dark), accent swatches, row spacing (Comfortable, Compact), week start, list names and colours, default alert, notification permission, install instructions, copy backup, reset.
+Theme (System, Light, Dark), accent swatches, row spacing (Comfortable, Compact), week start, list names and colours, default alert, daily summary (morning and evening: on/off and time), notification permission, install instructions, copy backup, reset.
 
 ## Motion
 - Allowed: sheet slide and scrim, check pop, toast in and out, error shake on empty title, the one-time rail load-in. These all respond to the user or happen once.
