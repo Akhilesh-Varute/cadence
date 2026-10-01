@@ -16,7 +16,7 @@ export const metadata = {
 export const viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#EDF0F7" },
-    { media: "(prefers-color-scheme: dark)", color: "#0A0F24" },
+    { media: "(prefers-color-scheme: dark)", color: "#14131A" },
   ],
   width: "device-width",
   initialScale: 1,
@@ -28,7 +28,7 @@ export const viewport = {
 // no flash. The store keeps this key up to date (see components/Providers.jsx).
 const initUi = `try{var u=JSON.parse(localStorage.getItem("sharpen:ui")||"{}"),r=document.documentElement;
 if(u.theme&&u.theme!=="system")r.setAttribute("data-theme",u.theme);
-if(u.accent)r.style.setProperty("--accent",u.accent);
+if(u.accent)r.style.setProperty("--accent-base",u.accent);
 if(u.density)r.setAttribute("data-density",u.density)}catch(e){}`;
 
 export default function RootLayout({ children }) {

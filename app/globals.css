@@ -6,6 +6,17 @@
   --body: var(--font-body), system-ui, -apple-system, sans-serif;
 }
 
+/* --accent-base is what the Settings swatch sets; the light theme uses it as is,
+   the dark theme lightens it (see design/tokens.css). The other three are
+   per-theme surfaces: the same colours as before in light, raised in dark. */
+:root {
+  --accent: var(--accent-base, #3346FF);
+  --sheet-bg: var(--paper);
+  --bar-bg: color-mix(in srgb, var(--paper) 88%, transparent);
+  --toast-bg: var(--ink);
+  --toast-ink: var(--paper);
+}
+
 html { scroll-padding-top: env(safe-area-inset-top, 0px); }
 *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 body {
@@ -78,7 +89,7 @@ input, textarea, select { font: inherit; color: inherit; }
 .days button.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 
 /* tab bar */
-.tabs { position: fixed; left: 0; right: 0; bottom: 0; max-width: 480px; margin: 0 auto; background: color-mix(in srgb, var(--paper) 88%, transparent); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); border-top: 1px solid var(--line); display: grid; grid-template-columns: 1fr 1fr 78px 1fr 1fr; align-items: center; padding: 8px 6px calc(8px + env(safe-area-inset-bottom, 0px)); z-index: 20; }
+.tabs { position: fixed; left: 0; right: 0; bottom: 0; max-width: 480px; margin: 0 auto; background: var(--bar-bg); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); border-top: 1px solid var(--line); display: grid; grid-template-columns: 1fr 1fr 78px 1fr 1fr; align-items: center; padding: 8px 6px calc(8px + env(safe-area-inset-bottom, 0px)); z-index: 20; }
 .tab { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 11.5px; font-weight: 500; color: var(--muted); padding: 4px 0; text-decoration: none; }
 .tab svg { width: 25px; height: 25px; stroke: currentColor; stroke-width: 1.8; fill: none; stroke-linecap: round; stroke-linejoin: round; }
 .tab.on { color: var(--accent); }
@@ -88,7 +99,7 @@ input, textarea, select { font: inherit; color: inherit; }
 
 /* sheet */
 #scrim { position: fixed; inset: 0; background: rgba(8,12,30,.5); z-index: 40; }
-#sheet { position: fixed; left: 0; right: 0; bottom: 0; max-width: 480px; margin: 0 auto; max-height: 94dvh; background: var(--paper); border-radius: 24px 24px 0 0; z-index: 41; display: flex; flex-direction: column; box-shadow: 0 -10px 40px rgba(0,0,0,.25); }
+#sheet { position: fixed; left: 0; right: 0; bottom: 0; max-width: 480px; margin: 0 auto; max-height: 94dvh; background: var(--sheet-bg); border-radius: 24px 24px 0 0; z-index: 41; display: flex; flex-direction: column; box-shadow: 0 -10px 40px rgba(0,0,0,.25); }
 .sh-top { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px 10px; flex: none; }
 .sh-top h2 { margin: 0; font-family: var(--display); font-size: 18px; font-weight: 700; }
 .sh-top button { font-weight: 600; color: var(--accent); padding: 6px 2px; font-size: 16px; }
@@ -115,7 +126,7 @@ input, textarea, select { font: inherit; color: inherit; }
 .danger { margin-top: 28px; width: 100%; padding: 13px; border-radius: 12px; border: 1.5px solid var(--line); color: var(--danger); font-weight: 600; }
 
 /* toast */
-#toast { position: fixed; left: 16px; right: 16px; max-width: 448px; margin: 0 auto; top: calc(12px + env(safe-area-inset-top, 0px)); z-index: 60; background: var(--ink); color: var(--paper); border-radius: 14px; padding: 13px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14.5px; font-weight: 500; }
+#toast { position: fixed; left: 16px; right: 16px; max-width: 448px; margin: 0 auto; top: calc(12px + env(safe-area-inset-top, 0px)); z-index: 60; background: var(--toast-bg); color: var(--toast-ink); border-radius: 14px; padding: 13px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14.5px; font-weight: 500; }
 #toast b { color: var(--signal); }
 #toast button { font-weight: 700; color: var(--signal); }
 

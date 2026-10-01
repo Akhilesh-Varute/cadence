@@ -154,7 +154,7 @@ export function StoreProvider({ enabled, children }) {
     const r = document.documentElement;
     if (settings.theme === "system") r.removeAttribute("data-theme");
     else r.setAttribute("data-theme", settings.theme);
-    r.style.setProperty("--accent", settings.accent);
+    r.style.setProperty("--accent-base", settings.accent);
     r.setAttribute("data-density", settings.density);
     try {
       localStorage.setItem("sharpen:ui", JSON.stringify({ theme: settings.theme, accent: settings.accent, density: settings.density }));

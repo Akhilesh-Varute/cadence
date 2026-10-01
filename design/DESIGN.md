@@ -9,10 +9,10 @@ A transit timetable for your day. Hairline-divided rows, right-aligned tabular t
 ## Palette
 | Name | Light | Dark | Use |
 |---|---|---|---|
-| Chalk paper | #EDF0F7 | #0A0F24 | Page background |
-| Surface | #FFFFFF | #141C3B | Sheets, raised controls |
-| Surface 2 | #E2E7F2 | #1D2750 | Inputs, segmented track |
-| Navy ink | #0F1A3D | #EBEEFF | Text, selected chips |
+| Chalk paper | #EDF0F7 | #14131A | Page background |
+| Surface | #FFFFFF | #1E1D26 | Sheets, raised controls |
+| Surface 2 | #E2E7F2 | #2A2933 | Inputs, segmented track |
+| Navy ink | #0F1A3D | #EFEEF6 | Text, selected chips |
 | Ultramarine (accent) | #3346FF | same | Default accent, user-changeable |
 | Marigold | #FFC233 | same | "Now" marker, overdue (dark mode text) only |
 | Mint | #1FAA82 | same | Done, Health list |
