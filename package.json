@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "next lint",
     "db:init": "node scripts/init-db.mjs",
-    "db:backup": "node scripts/backup.mjs"
+    "db:backup": "node scripts/backup.mjs",
+    "test": "node --test lib/"
   },
   "dependencies": {
     "@libsql/client": "^0.14.0",
