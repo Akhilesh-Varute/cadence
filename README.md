@@ -1,6 +1,7 @@
 # Cadence
 
 Todos and recurring reminders with push notifications — for you, not for
+nRepository: `Akhilesh-Varute/cadence` (renamed from `sharpen`).
 work. Single-purpose on purpose: it exists to build a daily habit.
 
 ## What's in here
