@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { checkPin, createSessionToken, SESSION_COOKIE } from "../../../lib/auth";
 import { getDb } from "../../../lib/db";
+import { ensureSchema } from "../../../lib/data";
 
 // A 6-digit numeric PIN is only ~1M combinations, and this endpoint has no
 // other protection -- without throttling it's brute-forceable by anyone who
@@ -20,6 +21,7 @@ function clientIp(req) {
 }
 
 export async function POST(req) {
+  await ensureSchema(); // creates login_attempts if this database never had it
   const db = getDb();
   const ip = clientIp(req);
 
