@@ -103,3 +103,21 @@ h1, h2 {
     background-image: linear-gradient(155deg, #d99a52, #e8ac6c);
   }
 }
+
+/* iOS Safari gives date/time inputs an intrinsic min-width and native
+   styling that ignore w-full, so they overflow their card. */
+input[type="time"], input[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+  min-height: 3rem;
+  text-align: left;
+}
+input[type="time"]::-webkit-date-and-time-value,
+input[type="date"]::-webkit-date-and-time-value {
+  text-align: left;
+  min-width: 0;
+}
