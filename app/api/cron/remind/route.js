@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getDb } from "../../../../lib/db";
+import { getDb, ensureReminderTables } from "../../../../lib/db";
 import { sendToAll } from "../../../../lib/push";
 
 export const dynamic = "force-dynamic";
@@ -38,6 +38,7 @@ export async function GET(req) {
   if (!secret || req.headers.get("authorization") !== `Bearer ${secret}`) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
+  await ensureReminderTables();
   const db = getDb();
   const { rows } = await db.execute("SELECT * FROM reminders WHERE enabled = 1");
   let fired = 0;

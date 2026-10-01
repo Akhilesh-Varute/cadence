@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getDb } from "../../../lib/db";
+import { getDb, ensureReminderTables } from "../../../lib/db";
 import { sendToAll } from "../../../lib/push";
 
 export async function GET() {
@@ -14,6 +14,7 @@ export async function POST(req) {
   if (!endpoint || !keys?.p256dh || !keys?.auth) {
     return NextResponse.json({ error: "invalid subscription" }, { status: 400 });
   }
+  await ensureReminderTables();
   await getDb().execute({
     sql: "INSERT OR REPLACE INTO push_subscriptions (endpoint, p256dh, auth) VALUES (?, ?, ?)",
     args: [endpoint, keys.p256dh, keys.auth],

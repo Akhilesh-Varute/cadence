@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getDb } from "../../../lib/db";
+import { getDb, ensureReminderTables } from "../../../lib/db";
 
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -20,6 +20,7 @@ function clean(b) {
 // ?today=YYYY-MM-DD also returns which reminders were ticked off that day.
 export async function GET(req) {
   const today = req.nextUrl.searchParams.get("today");
+  await ensureReminderTables();
   const db = getDb();
   const { rows } = await db.execute("SELECT * FROM reminders ORDER BY time ASC, id ASC");
   let doneIds = [];
@@ -35,6 +36,7 @@ export async function POST(req) {
   if (!r.title || !TIME_RE.test(r.time || "")) {
     return NextResponse.json({ error: "title and HH:MM time required" }, { status: 400 });
   }
+  await ensureReminderTables();
   await getDb().execute({
     sql: "INSERT INTO reminders (title, time, days, date, tz) VALUES (?, ?, ?, ?, ?)",
     args: [r.title, r.time, r.days, r.date, r.tz],
@@ -47,6 +49,7 @@ export async function POST(req) {
 // clears last_fired_date so a changed time can fire again today).
 export async function PATCH(req) {
   const b = await req.json();
+  await ensureReminderTables();
   const db = getDb();
   if (b.done !== undefined) {
     if (!DATE_RE.test(b.date || "")) return NextResponse.json({ error: "date required" }, { status: 400 });
@@ -72,6 +75,7 @@ export async function PATCH(req) {
 
 export async function DELETE(req) {
   const id = req.nextUrl.searchParams.get("id");
+  await ensureReminderTables();
   const db = getDb();
   await db.execute({ sql: "DELETE FROM reminder_logs WHERE reminder_id = ?", args: [id] });
   await db.execute({ sql: "DELETE FROM reminders WHERE id = ?", args: [id] });
