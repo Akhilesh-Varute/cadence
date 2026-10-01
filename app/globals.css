@@ -57,8 +57,42 @@ button, a, [role="button"] {
   user-select: none;
 }
 
+button, a {
+  transition: transform 150ms ease, opacity 150ms ease, background-color 200ms ease;
+}
+
 button:active, a:active {
   opacity: 0.7;
+  transform: scale(0.97);
+}
+
+h1, h2 {
+  text-wrap: balance;
+}
+
+/* Staggered entry: children of .stagger rise in one after another. */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+.stagger > * {
+  animation: rise 380ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.stagger > *:nth-child(2) { animation-delay: 60ms; }
+.stagger > *:nth-child(3) { animation-delay: 120ms; }
+.stagger > *:nth-child(4) { animation-delay: 180ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  .stagger > * { animation: none; }
+  button, a { transition: none; }
+}
+
+:focus-visible {
+  outline: 2px solid #a8611f;
+  outline-offset: 2px;
+}
+@media (prefers-color-scheme: dark) {
+  :focus-visible { outline-color: #d99a52; }
 }
 
 .mark-glyph {

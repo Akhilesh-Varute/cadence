@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Spinner from "../../components/Spinner";
+import Skeleton from "../../components/Skeleton";
 import ErrorBanner from "../../components/ErrorBanner";
 import { fetchJson } from "../../lib/fetchJson";
 import { DAY_LABELS, toDateStr, repeatLabel, fmtTime } from "../../lib/reminders";
@@ -137,8 +138,8 @@ export default function RemindersPage() {
     set({ days: form.days.includes(d) ? form.days.filter((x) => x !== d) : [...form.days, d] });
 
   return (
-    <div className="space-y-4">
-      <h1 className="font-display text-3xl">Reminders</h1>
+    <div className="space-y-4 stagger">
+      <h1 className="font-display text-4xl tracking-tight leading-none">Reminders</h1>
       {error && <ErrorBanner message={error} />}
 
       {notif !== "on" && notif !== "checking" && (
@@ -211,15 +212,13 @@ export default function RemindersPage() {
       )}
 
       {loading ? (
-        <div className="flex justify-center py-10">
-          <Spinner className="w-6 h-6" />
-        </div>
+        <Skeleton rows={2} />
       ) : (
         <ul className="space-y-3">
           {list.map((r) => (
             <li key={r.id} className={`${CARD} !space-y-0 flex items-center gap-3 ${r.enabled ? "" : "opacity-50"}`}>
               <button onClick={() => edit(r)} className="flex-1 min-w-0 text-left">
-                <div className="font-display text-2xl leading-none">{fmtTime(r.time)}</div>
+                <div className="font-display font-tabular text-3xl tracking-tight leading-none">{fmtTime(r.time)}</div>
                 <div className="text-base truncate mt-1">{r.title}</div>
                 <div className="text-xs text-ink-faint dark:text-dink-faint">{repeatLabel(r)}</div>
               </button>
@@ -243,7 +242,11 @@ export default function RemindersPage() {
               </button>
             </li>
           ))}
-          {list.length === 0 && <p className="text-ink-faint dark:text-dink-faint text-base">No reminders yet.</p>}
+          {list.length === 0 && (
+            <p className="text-ink-faint dark:text-dink-faint text-base">
+              Nothing scheduled. Add one for the thing you keep forgetting — it will ping you at that time, every day.
+            </p>
+          )}
         </ul>
       )}
     </div>

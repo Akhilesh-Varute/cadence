@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Spinner from "../components/Spinner";
+import Skeleton from "../components/Skeleton";
 import ErrorBanner from "../components/ErrorBanner";
 import { fetchJson } from "../lib/fetchJson";
 import { getCache, setCache } from "../lib/pageCache";
@@ -98,18 +99,31 @@ export default function TodayPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex justify-center py-20">
-        <Spinner className="w-6 h-6" />
-      </div>
-    );
+    return <Skeleton />;
   }
 
+  const total = due.length + todos.length;
+  const finished = due.filter((r) => doneIds.includes(r.id)).length + todos.filter((t) => t.done).length;
+
   return (
-    <div className="space-y-4">
-      <h1 className="font-display text-3xl">
-        {new Date().toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })}
-      </h1>
+    <div className="space-y-4 stagger">
+      <header>
+        <h1 className="font-display text-4xl tracking-tight leading-none">
+          {new Date().toLocaleDateString(undefined, { weekday: "long" })}
+        </h1>
+        <p className="text-sm text-ink-soft dark:text-dink-soft mt-1.5">
+          {new Date().toLocaleDateString(undefined, { day: "numeric", month: "long" })}
+          {total > 0 && (finished === total ? " · all done" : ` · ${finished} of ${total} done`)}
+        </p>
+        {total > 0 && (
+          <div className="h-1 mt-3 rounded-full bg-line dark:bg-dline overflow-hidden">
+            <div
+              className="h-full bg-good dark:bg-dgood transition-[width] duration-500"
+              style={{ width: `${(finished / total) * 100}%` }}
+            />
+          </div>
+        )}
+      </header>
       {error && <ErrorBanner message={error} onRetry={load} />}
 
       <section className={CARD}>
@@ -128,7 +142,7 @@ export default function TodayPage() {
                 <span className={`flex-1 min-w-0 text-base ${done ? "line-through text-ink-faint dark:text-dink-faint" : ""}`}>
                   {r.title}
                 </span>
-                <span className="flex-none text-xs font-mono text-ink-faint dark:text-dink-faint">{fmtTime(r.time)}</span>
+                <span className="flex-none text-xs font-mono font-tabular text-ink-faint dark:text-dink-faint">{fmtTime(r.time)}</span>
               </li>
             );
           })}
@@ -175,7 +189,7 @@ export default function TodayPage() {
               </button>
             </li>
           ))}
-          {todos.length === 0 && <p className="text-ink-faint dark:text-dink-faint text-base py-1">Nothing yet.</p>}
+          {todos.length === 0 && <p className="text-ink-faint dark:text-dink-faint text-base py-1">Nothing on the list. Add what you want done today.</p>}
         </ul>
       </section>
     </div>
