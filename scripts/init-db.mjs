@@ -87,6 +87,34 @@ CREATE INDEX IF NOT EXISTS idx_learning_log_date ON learning_log(log_date);
 -- learning_item_id IN (...) -- SQLite doesn't auto-index FK columns.
 CREATE INDEX IF NOT EXISTS idx_learning_log_item ON learning_log(learning_item_id);
 
+-- Reminders: a title at a local time, repeating on the days column (comma
+-- list of 0=Sun..6=Sat, empty = every day) or once on the date column. tz is
+-- the IANA zone the phone was in when saved, so the server cron can work out
+-- local time. last_fired_date stops the cron re-sending the same day.
+CREATE TABLE IF NOT EXISTS reminders (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  title TEXT NOT NULL,
+  time TEXT NOT NULL,
+  days TEXT NOT NULL DEFAULT '',
+  date TEXT,
+  tz TEXT NOT NULL DEFAULT 'UTC',
+  enabled INTEGER NOT NULL DEFAULT 1,
+  last_fired_date TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS reminder_logs (
+  reminder_id INTEGER NOT NULL REFERENCES reminders(id) ON DELETE CASCADE,
+  log_date TEXT NOT NULL,
+  PRIMARY KEY (reminder_id, log_date)
+);
+
+CREATE TABLE IF NOT EXISTS push_subscriptions (
+  endpoint TEXT PRIMARY KEY,
+  p256dh TEXT NOT NULL,
+  auth TEXT NOT NULL
+);
+
 -- Failed PIN attempts, for basic login rate limiting (see api/login).
 -- Only failures are logged -- a successful login doesn't need throttling.
 CREATE TABLE IF NOT EXISTS login_attempts (

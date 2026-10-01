@@ -11,14 +11,15 @@ export const config = {
   // so a home-screen icon refetch after the session cookie expires would
   // 302 to /login instead of returning the image. Listed explicitly now.
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|apple-touch-icon.png|icon-192.png|icon-512.png|manifest.json).*)",
+    "/((?!_next/static|_next/image|favicon.ico|apple-touch-icon.png|icon-192.png|icon-512.png|manifest.json|sw.js).*)",
   ],
 };
 
 export async function middleware(req) {
   const { pathname } = req.nextUrl;
 
-  if (pathname === "/login" || pathname === "/api/login") {
+  // /api/cron/remind checks its own bearer secret (GitHub Actions has no session cookie).
+  if (pathname === "/login" || pathname === "/api/login" || pathname === "/api/cron/remind") {
     return NextResponse.next();
   }
 

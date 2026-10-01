@@ -1,0 +1,17 @@
+name: Send reminders
+
+# Pings the app every 5 minutes so due reminders go out as push
+# notifications. GitHub's scheduler is best-effort: expect a few minutes of lag.
+# Repo secrets: APP_URL (e.g. https://sharpen.vercel.app) and CRON_SECRET
+# (same value as set on Vercel).
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    steps:
+      - run: curl -fsS -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" "${{ secrets.APP_URL }}/api/cron/remind"
