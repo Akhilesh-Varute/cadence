@@ -10,3 +10,7 @@ dev.log
 
 # Local Claude Code / Cowork session state -- not project config.
 .claude/
+
+# third-party agent skills (reinstall with: npx skills add Leonxlnx/taste-skill)
+.agents/
+skills-lock.json
