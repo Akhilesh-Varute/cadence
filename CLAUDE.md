@@ -1,6 +1,6 @@
-# Sharpen: instructions for Claude Code
+# Cadence: instructions for Claude Code
 
-You are redesigning the existing Sharpen app (this repository) to match the Cadence design in `design/`.
+You are working on Cadence (formerly Sharpen), following the Cadence design in `design/`.
 
 ## Sources of truth, in order
 1. `design/reference/cadence.html`: working reference. Open it, read its CSS and JS. Match it, do not reinterpret it.
@@ -27,7 +27,7 @@ You are redesigning the existing Sharpen app (this repository) to match the Cade
 1. Audit this codebase. Write `MIGRATION_PLAN.md`: current stack, every existing feature, how each maps to the new design, anything missing from the design, and a proposed build order. Stop and ask me to approve it.
 2. After approval, build in small steps, committing after each: tokens and base styles, tab bar and shell, Today with the day rail, Reminders, Tasks, editor sheet, Settings, then notifications and sync.
 3. After each screen, render it at 390px in light and dark, compare against `design/reference/screenshots/`, and fix differences before moving on.
-4. Do not change the app name. The name is Sharpen. "Cadence" is only the prototype's codename; you may use the word "cadence" for the repeat feature in the UI if it reads naturally.
+4. The app is named Cadence (renamed from Sharpen on 2026-10-01). Internal identifiers (cookie, database, URL, storage keys) keep the old "sharpen" name on purpose.
 5. Ask before adding dependencies beyond GSAP, a build tool, and test tooling.
 
 ## Definition of done

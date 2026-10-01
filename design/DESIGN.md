@@ -1,4 +1,4 @@
-# Sharpen: design specification
+# Cadence: design specification
 
 Reference implementation: `design/reference/cadence.html` (open it in a browser at 390px wide).
 Tokens: `design/tokens.css`. When this document and the reference disagree, the reference wins.

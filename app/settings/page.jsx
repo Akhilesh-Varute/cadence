@@ -61,8 +61,8 @@ const PUSH_NOTE = {
   checking: "Checking this device.",
   on: "On for this device. A test notification was sent.",
   off: "Off. Turn it on to get alerts when the app is closed.",
-  denied: "Blocked. Allow notifications for Sharpen in your browser or phone settings, then reload.",
-  unsupported: "Not available here. On iPhone, add Sharpen to your Home Screen first, then open it from there.",
+  denied: "Blocked. Allow notifications for Cadence in your browser or phone settings, then reload.",
+  unsupported: "Not available here. On iPhone, add Cadence to your Home Screen first, then open it from there.",
 };
 
 export default function SettingsPage() {

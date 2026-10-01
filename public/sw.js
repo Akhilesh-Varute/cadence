@@ -1,7 +1,7 @@
-// Sharpen service worker: push notifications + an offline cache.
+// Cadence service worker: push notifications + an offline cache.
 // Data itself is cached by the app in IndexedDB; this caches the app shell so
 // it opens with no connection.
-const CACHE = "sharpen-v2";
+const CACHE = "cadence-v3";
 const PAGES = ["/", "/reminders", "/tasks", "/settings"];
 
 self.addEventListener("install", (e) => {
@@ -64,7 +64,7 @@ self.addEventListener("fetch", (e) => {
 
 // iOS requires every push to show a notification, so no early returns.
 self.addEventListener("push", (e) => {
-  const d = e.data ? e.data.json() : { title: "Sharpen" };
+  const d = e.data ? e.data.json() : { title: "Cadence" };
   e.waitUntil(
     self.registration.showNotification(d.title, {
       body: d.body,

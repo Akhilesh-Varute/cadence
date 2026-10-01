@@ -1,4 +1,4 @@
-# Sharpen
+# Cadence
 
 Todos and recurring reminders with push notifications — for you, not for
 work. Single-purpose on purpose: it exists to build a daily habit.

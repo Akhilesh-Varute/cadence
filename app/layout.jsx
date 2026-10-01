@@ -6,11 +6,11 @@ const display = Bricolage_Grotesque({ subsets: ["latin"], axes: ["opsz"], variab
 const body = Instrument_Sans({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-body", display: "swap" });
 
 export const metadata = {
-  title: "Sharpen",
+  title: "Cadence",
   description: "Reminders and tasks that keep you on a daily cadence.",
   manifest: "/manifest.json",
   icons: { icon: "/icon-192.png", apple: "/apple-touch-icon.png" },
-  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Sharpen" },
+  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Cadence" },
 };
 
 export const viewport = {

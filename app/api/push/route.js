@@ -20,6 +20,6 @@ export async function POST(req) {
     sql: "INSERT OR REPLACE INTO push_subscriptions (endpoint, p256dh, auth) VALUES (?, ?, ?)",
     args: [endpoint, keys.p256dh, keys.auth],
   });
-  await sendToAll({ title: "Sharpen", body: "Notifications are on", tag: "welcome" });
+  await sendToAll({ title: "Cadence", body: "Notifications are on", tag: "welcome" });
   return NextResponse.json({ ok: true });
 }

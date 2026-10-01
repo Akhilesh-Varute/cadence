@@ -55,7 +55,7 @@ function LoginForm() {
 
   return (
     <form className="login" onSubmit={submit}>
-      <h1 className="big">Sharpen</h1>
+      <h1 className="big">Cadence</h1>
       <p className="sub">Enter your PIN to open your reminders.</p>
       <input
         className="pin"
