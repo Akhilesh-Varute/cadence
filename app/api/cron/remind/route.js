@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
-import { getDb, ensureReminderTables } from "../../../../lib/db";
+import { getDb } from "../../../../lib/db";
+import { ensureSchema, getSettings, toReminder } from "../../../../lib/data";
 import { sendToAll } from "../../../../lib/push";
-import { isDueOn } from "../../../../lib/reminders";
+import { wallClock, rollForward, parse, dateOnly, fmtTime } from "../../../../lib/recurrence";
 
 export const dynamic = "force-dynamic";
 
-// A late cron run (GitHub Actions can lag) still fires, but only within this
-// many minutes of the set time -- no 9am reminder arriving at 9pm.
+// A late cron run still fires an alert, but only within this many minutes of
+// it being due -- no 9am reminder arriving at 9pm.
 const GRACE_MIN = 120;
 
 // Daily digests, local time. Change here to move them.
@@ -15,76 +16,87 @@ const DIGESTS = [
   { kind: "evening", at: 20 * 60 },
 ];
 
-function localNow(tz) {
-  let parts;
-  try {
-    parts = new Intl.DateTimeFormat("en-CA", {
-      timeZone: tz,
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      hourCycle: "h23",
-      weekday: "short",
-    }).formatToParts(new Date());
-  } catch {
-    return localNow("UTC");
+function alertBody(m, cursor) {
+  const time = fmtTime(parse(cursor));
+  if (m === 0) return time;
+  return m >= 1440 ? `Tomorrow, ${time}` : `In ${m} min, ${time}`;
+}
+
+// Per reminder: roll a repeating one forward if its next occurrence has
+// arrived, then send each alert whose moment has come and hasn't been sent for
+// this occurrence. `fired` records sent alerts so nothing repeats.
+async function sendReminderAlerts(db, fallbackTz) {
+  const { rows } = await db.execute("SELECT * FROM reminder_items WHERE done = 0");
+  let sent = 0;
+  for (const row of rows) {
+    const r = toReminder(row);
+    const now = wallClock(r.tz || fallbackTz);
+    let changed = rollForward(r, now);
+    for (const m of r.alerts) {
+      const key = `${r.cursor}|${m}`;
+      if (r.fired[key]) continue;
+      const due = new Date(parse(r.cursor).getTime() - m * 60000);
+      if (due > now) continue;
+      r.fired[key] = 1;
+      changed = true;
+      if (now - due > GRACE_MIN * 60000) continue; // too stale to be useful
+      await sendToAll({ title: r.title, body: alertBody(m, r.cursor), tag: `reminder-${r.id}-${m}` });
+      sent++;
+    }
+    if (changed) {
+      // updated_at is left alone on purpose: this is scheduler bookkeeping, not a user edit.
+      await db.execute({
+        sql: "UPDATE reminder_items SET cursor = ?, fired = ? WHERE id = ?",
+        args: [r.cursor, JSON.stringify(r.fired), r.id],
+      });
+    }
   }
-  const p = Object.fromEntries(parts.map((x) => [x.type, x.value]));
-  return {
-    date: `${p.year}-${p.month}-${p.day}`,
-    minutes: Number(p.hour) * 60 + Number(p.minute),
-    dow: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].indexOf(p.weekday),
-  };
+  return sent;
 }
 
 // One push per kind per local day: the digest_log insert is the lock, so
 // overlapping cron calls can't double-send.
 async function sendDigests(db, tz) {
-  const now = localNow(tz);
+  const wall = wallClock(tz);
+  const today = dateOnly(wall);
+  const minutes = wall.getHours() * 60 + wall.getMinutes();
   let sent = 0;
   for (const d of DIGESTS) {
-    const late = now.minutes - d.at;
+    const late = minutes - d.at;
     if (late < 0 || late > GRACE_MIN) continue;
     const claim = await db.execute({
       sql: "INSERT OR IGNORE INTO digest_log (kind, log_date) VALUES (?, ?)",
-      args: [d.kind, now.date],
+      args: [d.kind, today],
     });
     if (!claim.rowsAffected) continue;
 
-    const todos = (
+    // Same rule as the Today screen: tasks due today or earlier, reminders due today or overdue.
+    const tasks = (
       await db.execute({
-        sql: "SELECT text FROM todos WHERE done = 0 AND (defer_until IS NULL OR defer_until <= ?) ORDER BY created_at DESC",
-        args: [now.date],
+        sql: "SELECT title FROM task_items WHERE done = 0 AND due != '' AND due <= ? ORDER BY due, title",
+        args: [today],
       })
-    ).rows.map((r) => r.text);
-    const rems = (await db.execute("SELECT * FROM reminders WHERE enabled = 1")).rows.filter((r) => isDueOn(r, now.date));
-    let doneRems = 0;
-    if (d.kind === "evening" && rems.length) {
-      const logs = await db.execute({ sql: "SELECT reminder_id FROM reminder_logs WHERE log_date = ?", args: [now.date] });
-      const ids = new Set(logs.rows.map((x) => Number(x.reminder_id)));
-      doneRems = rems.filter((r) => ids.has(Number(r.id))).length;
-    }
-    const openRems = rems.length - doneRems;
-    const n = todos.length + openRems;
+    ).rows.map((r) => r.title);
+    const reminders = (
+      await db.execute({
+        sql: "SELECT title FROM reminder_items WHERE done = 0 AND substr(cursor, 1, 10) <= ?",
+        args: [today],
+      })
+    ).rows.map((r) => r.title);
+    const names = [...tasks, ...reminders];
+    const n = names.length;
     const plural = (k, w) => `${k} ${w}${k === 1 ? "" : "s"}`;
 
     let payload;
     if (d.kind === "morning") {
       if (!n) continue;
-      payload = {
-        title: `Today: ${plural(n, "thing")}`,
-        body: [...todos.slice(0, 3), ...(openRems ? [plural(openRems, "reminder")] : [])].join(" · "),
-      };
+      payload = { title: `Today: ${plural(n, "thing")}`, body: names.slice(0, 3).join(", ") };
+    } else if (n) {
+      payload = { title: `${plural(n, "thing")} still open`, body: names.slice(0, 3).join(", ") };
     } else {
-      if (!n) {
-        const done = await db.execute({ sql: "SELECT COUNT(*) c FROM todos WHERE completed_date = ?", args: [now.date] });
-        if (!Number(done.rows[0].c) && !rems.length) continue;
-        payload = { title: "All done today", body: "Nothing left open. Nice." };
-      } else {
-        payload = { title: `${plural(n, "thing")} still open`, body: todos.slice(0, 3).join(" · ") || plural(openRems, "reminder") };
-      }
+      const done = await db.execute({ sql: "SELECT COUNT(*) c FROM task_items WHERE completed_date = ?", args: [today] });
+      if (!Number(done.rows[0].c)) continue;
+      payload = { title: "All done today", body: "Nothing left open." };
     }
     await sendToAll({ ...payload, tag: `digest-${d.kind}` });
     sent++;
@@ -92,36 +104,17 @@ async function sendDigests(db, tz) {
   return sent;
 }
 
-// Called every few minutes by an external every-minute cron (cron-job.org).
+// Called every minute by cron-job.org.
 export async function GET(req) {
   const secret = process.env.CRON_SECRET;
   if (!secret || req.headers.get("authorization") !== `Bearer ${secret}`) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
-  await ensureReminderTables();
+  await ensureSchema();
   const db = getDb();
-  const { rows } = await db.execute("SELECT * FROM reminders WHERE enabled = 1");
-  let fired = 0;
-  for (const r of rows) {
-    const now = localNow(r.tz);
-    if (r.last_fired_date === now.date) continue;
-    if (r.date ? r.date !== now.date : r.days && !r.days.split(",").includes(String(now.dow))) continue;
-    const [h, m] = r.time.split(":").map(Number);
-    const late = now.minutes - (h * 60 + m);
-    if (late < 0 || late > GRACE_MIN) continue;
-    // Skip the ping if it's already ticked off today.
-    const done = await db.execute({
-      sql: "SELECT 1 FROM reminder_logs WHERE reminder_id = ? AND log_date = ?",
-      args: [r.id, now.date],
-    });
-    await db.execute({ sql: "UPDATE reminders SET last_fired_date = ? WHERE id = ?", args: [now.date, r.id] });
-    if (done.rows.length) continue;
-    await sendToAll({ title: r.title, body: `${h % 12 || 12}:${String(m).padStart(2, "0")} ${h < 12 ? "AM" : "PM"}`, tag: `reminder-${r.id}` });
-    fired++;
-  }
-  // Digests follow the zone of the most recently saved reminder (same zone
-  // the reminders themselves use), Asia/Kolkata if there are none yet.
-  const tzRow = await db.execute("SELECT tz FROM reminders ORDER BY id DESC LIMIT 1");
-  const digests = await sendDigests(db, tzRow.rows[0]?.tz || "Asia/Kolkata");
+  // Zone used when a reminder has none, and for the digests: what the phone last reported.
+  const tz = (await getSettings()).tz || "Asia/Kolkata";
+  const fired = await sendReminderAlerts(db, tz);
+  const digests = await sendDigests(db, tz);
   return NextResponse.json({ ok: true, fired, digests });
 }
