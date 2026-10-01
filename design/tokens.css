@@ -1,0 +1,66 @@
+/* Sharpen design tokens. Source of truth: design/reference/cadence.html */
+:root{
+  /* colour: light */
+  --paper:#EDF0F7;      /* page background */
+  --surface:#FFFFFF;    /* sheets, raised controls */
+  --surface2:#E2E7F2;   /* inputs, segmented-control track */
+  --ink:#0F1A3D;        /* primary text */
+  --ink2:#3A4670;       /* secondary text */
+  --muted:#6A7599;      /* meta text */
+  --line:rgba(15,26,61,.13); /* hairlines */
+  --accent:#3346FF;     /* user-changeable accent */
+  --accent-ink:#FFFFFF; /* text on accent */
+  --signal:#FFC233;     /* marigold: "now" marker + overdue only */
+  --warn:#A85F00;       /* overdue text on light */
+  --mint:#1FAA82;       /* done / health */
+  --danger:#D23A4E;
+
+  /* default list colours (user-editable) */
+  --list-personal:#3346FF;
+  --list-work:#E0407B;
+  --list-home:#E58A00;
+  --list-health:#1FAA82;
+
+  /* type */
+  --display:'Bricolage Grotesque','Avenir Next',system-ui,sans-serif;
+  --body:'Instrument Sans',system-ui,-apple-system,sans-serif;
+
+  /* spacing + shape */
+  --pad-x:20px;
+  --pad-y:14px;         /* row padding, 9px in compact density */
+  --r-sheet:24px;
+  --r-control:12px;
+  --r-chip:999px;
+  --r-check-reminder:50%;
+  --r-check-task:8px;
+  --r-add:20px;
+  --app-max:480px;
+
+  /* safe areas (iPhone) */
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0A0F24; --surface:#141C3B; --surface2:#1D2750;
+    --ink:#EBEEFF; --ink2:#B5BDE0; --muted:#8089B3;
+    --line:rgba(235,238,255,.14); --warn:#FFC233; --accent-ink:#0A0F24;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0A0F24; --surface:#141C3B; --surface2:#1D2750;
+  --ink:#EBEEFF; --ink2:#B5BDE0; --muted:#8089B3;
+  --line:rgba(235,238,255,.14); --warn:#FFC233; --accent-ink:#0A0F24;
+}
+body[data-density="compact"]{--pad-y:9px}
+
+/* type scale */
+/* Large title  Bricolage 800, 46/1,  -0.035em, opsz 96
+   Section      Bricolage 700, 17,    -0.01em
+   Row title    Instrument 600, 16.5
+   Row time     Bricolage 700, 17, tabular-nums
+   Meta         Instrument 400, 13.5, --muted
+   Sheet title  Bricolage 700, 18
+   Field title  Bricolage 700, 26, -0.02em
+   Body         Instrument 400, 16 */
