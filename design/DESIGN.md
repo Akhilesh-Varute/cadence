@@ -48,7 +48,7 @@ Never use marigold decoratively. It always means "now" or "late".
 Order of fields for a reminder:
 1. Segmented Reminder / Task switch (new items only)
 2. Title (large, underline field) and notes
-3. When: native date and time inputs (iOS wheel pickers)
+3. When: native date and time inputs (iOS wheel pickers). For a daily or weekly repeat with "every 1" only the time shows (it starts today); the date shows for Never, Monthly, Yearly, or any "every N" with N above 1, labelled "Starts" when repeating.
 4. Repeat: Never, Daily, Weekly, Monthly, Yearly
    - "Every N unit" stepper
    - Weekly: seven day circles (order follows the week-start setting)

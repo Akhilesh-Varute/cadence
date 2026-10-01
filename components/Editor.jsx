@@ -151,6 +151,7 @@ function Sheet({ d, setD, blank }) {
   const toggleIn = (arr, v) => (arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v]);
 
   const preview = isR ? occ(d, now, 4) : [];
+  const showDate = isR && (["none", "monthly", "yearly"].includes(d.repeat.type) || d.repeat.interval > 1);
 
   return (
     <>
@@ -183,10 +184,14 @@ function Sheet({ d, setD, blank }) {
 
           {isR ? (
             <>
-              <label className="h">When</label>
-              <div className="pair">
-                <input className="inp" type="date" value={d.start.slice(0, 10)} onChange={(e) => e.target.value && patch({ start: `${e.target.value}T${d.start.slice(11, 16)}` })} />
-                <input className="inp" type="time" value={d.start.slice(11, 16)} onChange={(e) => e.target.value && patch({ start: `${d.start.slice(0, 10)}T${e.target.value}` })} />
+              {/* A plain daily or weekly reminder just starts today, so only its time is asked.
+                  The date matters for one-offs, monthly and yearly, and for "every N" with N above 1. */}
+              <label className="h">{d.repeat.type === "none" ? "When" : showDate ? "Starts" : "Time"}</label>
+              <div className={showDate ? "pair" : undefined}>
+                {showDate && (
+                  <input className="inp" type="date" aria-label="Date" value={d.start.slice(0, 10)} onChange={(e) => e.target.value && patch({ start: `${e.target.value}T${d.start.slice(11, 16)}` })} />
+                )}
+                <input className="inp" type="time" aria-label="Time" value={d.start.slice(11, 16)} onChange={(e) => e.target.value && patch({ start: `${d.start.slice(0, 10)}T${e.target.value}` })} />
               </div>
 
               <label className="h">Repeat</label>
