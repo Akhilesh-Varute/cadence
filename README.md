@@ -1,22 +1,14 @@
 # Sharpen
 
-A daily journal, todo list, habit tracker, and learning log — for you, not
-for work. Built as its own app on purpose, separate from win-deck, so your
-personal record doesn't live inside a PC-only control panel and *is*
-reachable from your phone.
+Todos and recurring reminders with push notifications — for you, not for
+work. Single-purpose on purpose: it exists to build a daily habit.
 
 ## What's in here
 
-- **Today** (`/`) — journal (free log + reflection), mood/energy, today's
-  todos, and a "learned today" quick-capture that files under whichever
-  learning track it belongs to (or "General").
-- **Habits** (`/habits`) — tap to mark done, see a 30-day strip, streak
-  counter. Tapping any past day toggles that day too, so a missed day isn't
-  a dead end.
-- **Learning** (`/learning`) — the tracks you're actively building skill in
-  (seeded from what's already on your V: drive: AWS, LangChain, LLM
-  fundamentals, Python — edit/rename/delete freely), each with its log of
-  dated entries underneath it.
+- **Today** (`/`) — today's reminders and todos, with a progress bar.
+- **Reminders** (`/reminders`) — recurring (daily, certain days) or one-off,
+  at a set time, delivered as push notifications. Also morning and evening
+  digest pushes of what's open.
 
 Single user, PIN-gated, same URL from your PC browser and your iPhone
 (Safari → Share → Add to Home Screen makes it feel like a real app).
@@ -47,7 +39,7 @@ Fill in `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` from above. For
 
 ```bash
 npm install
-npm run db:init      # creates tables, seeds default habits + learning tracks
+npm run db:init      # creates tables
 npm run dev           # http://localhost:3000
 ```
 

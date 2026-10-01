@@ -3,7 +3,7 @@ import NavBar from "../components/NavBar";
 
 export const metadata = {
   title: "Sharpen",
-  description: "Journal, habits, and learning — for you, not for work.",
+  description: "Todos and reminders for you, not for work.",
   manifest: "/manifest.json",
   icons: {
     icon: "/favicon.ico",

@@ -170,35 +170,6 @@ async function main() {
   if (backfill.rowsAffected > 0) {
     console.log(`Backfilled completed_date for ${backfill.rowsAffected} previously-completed todo(s).`);
   }
-
-  const { rows } = await db.execute("SELECT COUNT(*) as c FROM habits");
-  if (rows[0].c === 0) {
-    const defaultHabits = ["Read / study 30 min", "No mindless scroll before bed", "Exercise"];
-    for (let i = 0; i < defaultHabits.length; i++) {
-      await db.execute({
-        sql: "INSERT INTO habits (name, sort_order) VALUES (?, ?)",
-        args: [defaultHabits[i], i],
-      });
-    }
-    console.log("Seeded default habits — edit or delete these anytime in the app.");
-  }
-
-  const { rows: learningRows } = await db.execute("SELECT COUNT(*) as c FROM learning_items");
-  if (learningRows[0].c === 0) {
-    const seed = [
-      ["AWS Developer Associate", "Cloud"],
-      ["LangChain", "AI/LLM"],
-      ["LLM fundamentals", "AI/LLM"],
-      ["Python", "Programming"],
-    ];
-    for (let i = 0; i < seed.length; i++) {
-      await db.execute({
-        sql: "INSERT INTO learning_items (title, category, sort_order) VALUES (?, ?, ?)",
-        args: [seed[i][0], seed[i][1], i],
-      });
-    }
-    console.log("Seeded learning tracks from what's already on your drive — edit freely.");
-  }
 }
 
 main().then(() => process.exit(0)).catch((err) => {
