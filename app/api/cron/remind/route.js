@@ -32,7 +32,7 @@ function localNow(tz) {
   };
 }
 
-// Called every few minutes by .github/workflows/remind.yml.
+// Called every few minutes by an external every-minute cron (cron-job.org).
 export async function GET(req) {
   const secret = process.env.CRON_SECRET;
   if (!secret || req.headers.get("authorization") !== `Bearer ${secret}`) {
