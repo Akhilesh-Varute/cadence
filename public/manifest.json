@@ -3,8 +3,8 @@
   "short_name": "Sharpen",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#e9ede9",
-  "theme_color": "#a8611f",
+  "background_color": "#EDF0F7",
+  "theme_color": "#EDF0F7",
   "icons": [
     {
       "src": "/icon-192.png",

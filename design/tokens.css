@@ -53,7 +53,7 @@
   --ink:#EBEEFF; --ink2:#B5BDE0; --muted:#8089B3;
   --line:rgba(235,238,255,.14); --warn:#FFC233; --accent-ink:#0A0F24;
 }
-body[data-density="compact"]{--pad-y:9px}
+body[data-density="compact"],:root[data-density="compact"]{--pad-y:9px}
 
 /* type scale */
 /* Large title  Bricolage 800, 46/1,  -0.035em, opsz 96

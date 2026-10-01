@@ -27,6 +27,13 @@ const db = createClient({
 });
 
 const TABLES = [
+  "lists",
+  "reminder_items",
+  "task_items",
+  "app_settings",
+  // Older tables: the data was migrated into the ones above, but is kept.
+  "reminders",
+  "reminder_logs",
   "journal_entries",
   "todos",
   "habits",
@@ -38,8 +45,13 @@ const TABLES = [
 async function main() {
   const out = {};
   for (const table of TABLES) {
-    const { rows } = await db.execute(`SELECT * FROM ${table}`);
-    out[table] = rows;
+    try {
+      const { rows } = await db.execute(`SELECT * FROM ${table}`);
+      out[table] = rows;
+    } catch (err) {
+      // A table that doesn't exist yet (new tables are created on first use) isn't a backup failure.
+      if (!/no such table/i.test(err.message)) throw err;
+    }
   }
 
   const dir = path.join(process.cwd(), "backups");

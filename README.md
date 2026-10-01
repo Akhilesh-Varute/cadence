@@ -5,10 +5,19 @@ work. Single-purpose on purpose: it exists to build a daily habit.
 
 ## What's in here
 
-- **Today** (`/`) — today's reminders and todos, with a progress bar.
-- **Reminders** (`/reminders`) — recurring (daily, certain days) or one-off,
-  at a set time, delivered as push notifications. Also morning and evening
-  digest pushes of what's open.
+Designed after `design/DESIGN.md` (reference prototype in `design/reference/`).
+
+- **Today** (`/`) - a 24-hour day rail, overdue and upcoming reminders, tasks due today.
+- **Reminders** (`/reminders`) - repeat daily, weekly (chosen days), monthly or yearly, every N,
+  ending never / on a date / after N times. Several alerts each, priority, lists.
+- **Tasks** (`/tasks`) - quick add, steps, due date, priority, lists.
+- **Settings** (`/settings`) - theme, accent, spacing, week start, lists, default alert, push.
+- Works offline: data is copied to IndexedDB and edits sync when you are back online.
+- Push notifications: a per-minute call to `/api/cron/remind` (cron-job.org) sends due alerts,
+  plus morning and evening digests.
+
+Recurrence lives in `lib/recurrence.js`, shared by the app and the scheduler. Run its tests with
+`npm test`.
 
 Single user, PIN-gated, same URL from your PC browser and your iPhone
 (Safari → Share → Add to Home Screen makes it feel like a real app).

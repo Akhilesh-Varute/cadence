@@ -1,42 +1,44 @@
 import "./globals.css";
-import NavBar from "../components/NavBar";
+import { Bricolage_Grotesque, Instrument_Sans } from "next/font/google";
+import Providers from "../components/Providers";
+
+const display = Bricolage_Grotesque({ subsets: ["latin"], axes: ["opsz"], variable: "--font-display", display: "swap" });
+const body = Instrument_Sans({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-body", display: "swap" });
 
 export const metadata = {
   title: "Sharpen",
-  description: "Todos and reminders for you, not for work.",
+  description: "Reminders and tasks that keep you on a daily cadence.",
   manifest: "/manifest.json",
-  icons: {
-    icon: "/favicon.ico",
-    apple: "/apple-touch-icon.png",
-  },
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "black-translucent",
-    title: "Sharpen",
-  },
+  icons: { icon: "/icon-192.png", apple: "/apple-touch-icon.png" },
+  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Sharpen" },
 };
 
 export const viewport = {
-  themeColor: "#a8611f",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#EDF0F7" },
+    { media: "(prefers-color-scheme: dark)", color: "#0A0F24" },
+  ],
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
   viewportFit: "cover",
 };
 
+// Applies the saved theme, accent and density before first paint so there is
+// no flash. The store keeps this key up to date (see components/Providers.jsx).
+const initUi = `try{var u=JSON.parse(localStorage.getItem("sharpen:ui")||"{}"),r=document.documentElement;
+if(u.theme&&u.theme!=="system")r.setAttribute("data-theme",u.theme);
+if(u.accent)r.style.setProperty("--accent",u.accent);
+if(u.density)r.setAttribute("data-density",u.density)}catch(e){}`;
+
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body className="min-h-screen flex flex-col bg-bg dark:bg-dbg text-ink dark:text-dink">
-        <main
-          className="flex-1 max-w-2xl w-full mx-auto px-4 pb-28"
-          style={{
-            paddingTop: "calc(1.25rem + env(safe-area-inset-top, 0px))",
-          }}
-        >
-          {children}
-        </main>
-        <NavBar />
+    <html lang="en" className={`${display.variable} ${body.variable}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: initUi }} />
+      </head>
+      <body>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
