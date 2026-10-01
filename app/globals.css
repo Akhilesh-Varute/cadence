@@ -106,11 +106,25 @@ input, textarea, select { font: inherit; color: inherit; }
 .sh-top button.quiet { color: var(--muted); font-weight: 500; }
 .sh-body { overflow-y: auto; padding: 4px 20px calc(28px + env(safe-area-inset-bottom, 0px)); flex: 1; -webkit-overflow-scrolling: touch; }
 .sh-body label.h { display: block; font-size: 14px; font-weight: 600; color: var(--ink2); margin: 22px 0 9px; }
-.f-title { width: 100%; border: 0; background: transparent; font-family: var(--display); font-weight: 700; font-size: 26px; letter-spacing: -.02em; padding: 6px 0; outline: 0; border-bottom: 2px solid var(--line); border-radius: 0; }
+.f-title { width: 100%; text-overflow: ellipsis; border: 0; background: transparent; font-family: var(--display); font-weight: 700; font-size: 26px; letter-spacing: -.02em; padding: 6px 0; outline: 0; border-bottom: 2px solid var(--line); border-radius: 0; }
 .f-title:focus { border-color: var(--accent); }
 .f-notes { width: 100%; border: 0; background: var(--surface2); border-radius: 12px; padding: 11px 13px; min-height: 62px; resize: none; margin-top: 12px; outline: 0; }
 .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .inp { width: 100%; background: var(--surface2); border: 0; border-radius: 12px; padding: 12px 13px; font-size: 16px; font-variant-numeric: tabular-nums; min-height: 46px; }
+.pair > * { min-width: 0; }
+@media (max-width: 359px) { .pair { grid-template-columns: 1fr; } } /* too narrow for date + time side by side */
+/* iOS Safari gives date/time inputs a native min-width and styling that ignore
+   width: 100%, so they poke out of their grid cell. Reset them to plain boxes. */
+.inp[type="date"], .inp[type="time"] {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  text-align: left;
+}
+.inp::-webkit-date-and-time-value { text-align: left; min-width: 0; }
+.inp::-webkit-datetime-edit { padding: 0; }
 .step { display: flex; align-items: center; gap: 12px; background: var(--surface2); border-radius: 12px; padding: 6px 8px 6px 14px; justify-content: space-between; }
 .step div { display: flex; gap: 6px; }
 .step button { width: 36px; height: 36px; border-radius: 10px; background: var(--surface); font-size: 20px; font-weight: 600; }
