@@ -56,7 +56,7 @@ export async function GET(req) {
     });
     await db.execute({ sql: "UPDATE reminders SET last_fired_date = ? WHERE id = ?", args: [now.date, r.id] });
     if (done.rows.length) continue;
-    await sendToAll({ title: r.title, body: `Reminder at ${r.time}`, tag: `reminder-${r.id}` });
+    await sendToAll({ title: r.title, body: `${h % 12 || 12}:${String(m).padStart(2, "0")} ${h < 12 ? "AM" : "PM"}`, tag: `reminder-${r.id}` });
     fired++;
   }
   return NextResponse.json({ ok: true, fired });
