@@ -74,6 +74,8 @@ function Sheet({ d, setD, blank }) {
   const scrim = useRef(null);
   const title = useRef(null);
   const [closing, setClosing] = useState(false);
+  const [confirming, setConfirming] = useState(false);
+  const confirmBox = useRef(null);
   const isR = d._kind === "reminder";
   const patch = (p) => setD((x) => ({ ...x, ...p }));
 
@@ -98,11 +100,18 @@ function Sheet({ d, setD, blank }) {
     gsap.to(sheet.current, { yPercent: 100, duration: 0.3, ease: "power2.in", onComplete: () => setD(null) });
   }, [closing, setD]);
 
+  // Escape closes the confirmation first, then the sheet.
   useEffect(() => {
-    const onKey = (e) => e.key === "Escape" && close();
+    const onKey = (e) => e.key === "Escape" && (confirming ? setConfirming(false) : close());
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [close]);
+  }, [close, confirming]);
+
+  useEffect(() => {
+    if (confirming && confirmBox.current && !reducedMotion()) {
+      gsap.fromTo(confirmBox.current, { scale: 0.94, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.2, ease: "power2.out" });
+    }
+  }, [confirming]);
 
   function save() {
     if (!d.title.trim()) {
@@ -336,9 +345,21 @@ function Sheet({ d, setD, blank }) {
             </div>
           )}
 
-          {!d._new && <button className="danger" onClick={remove}>Delete {isR ? "reminder" : "task"}</button>}
+          {!d._new && <button className="danger" onClick={() => setConfirming(true)}>Delete {isR ? "reminder" : "task"}</button>}
         </div>
       </section>
+      {confirming && (
+        <div className="confirm-wrap" onClick={() => setConfirming(false)}>
+          <div className="confirm" ref={confirmBox} role="alertdialog" aria-modal="true" aria-labelledby="cf-title" aria-describedby="cf-text" onClick={(e) => e.stopPropagation()}>
+            <h3 id="cf-title">Delete this {isR ? "reminder" : "task"}?</h3>
+            <p id="cf-text">&ldquo;{d.title}&rdquo; will be removed. You can undo it for a few seconds afterwards.</p>
+            <div className="cf-actions">
+              <button className="btn alt" autoFocus onClick={() => setConfirming(false)}>Cancel</button>
+              <button className="btn dng" onClick={remove}>Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
